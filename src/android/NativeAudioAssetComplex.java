@@ -15,6 +15,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
+import org.apache.cordova.CordovaInterface;
 
 public class NativeAudioAssetComplex implements OnPreparedListener, OnCompletionListener {
 
@@ -29,16 +30,22 @@ public class NativeAudioAssetComplex implements OnPreparedListener, OnCompletion
 	private int state;
     Callable<Void> completeCallback;
 
-	public NativeAudioAssetComplex( AssetFileDescriptor afd, float volume)  throws IOException
+    private AudioManager am;
+    private int curVolume = 0;
+
+	public NativeAudioAssetComplex( AssetFileDescriptor afd, float volume, CordovaInterface cordova)  throws IOException
 	{
 		state = INVALID;
 		mp = new MediaPlayer();
         mp.setOnCompletionListener(this);
         mp.setOnPreparedListener(this);
 		mp.setDataSource( afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-		mp.setAudioStreamType(AudioManager.STREAM_MUSIC); 
+		mp.setAudioStreamType(AudioManager.STREAM_ALARM);
 		mp.setVolume(volume, volume);
 		mp.prepare();
+
+
+		am = (AudioManager)cordova.getActivity().getSystemService(Context.AUDIO_SERVICE);
 	}
 	
 	public void play(Callable<Void> completeCb) throws IOException
@@ -49,6 +56,9 @@ public class NativeAudioAssetComplex implements OnPreparedListener, OnCompletion
 	
 	private void invokePlay( Boolean loop )
 	{
+		curVolume = am.getStreamVolume(AudioManager.STREAM_ALARM);
+        am.setStreamVolume(AudioManager.STREAM_ALARM, am.getStreamMaxVolume(AudioManager.STREAM_ALARM), 0);
+
 		Boolean playing = ( mp.isLooping() || mp.isPlaying() );
 		if ( playing )
 		{
@@ -83,6 +93,8 @@ public class NativeAudioAssetComplex implements OnPreparedListener, OnCompletion
 		catch (IllegalStateException e)
 		{
 		// I don't know why this gets thrown; catch here to save app
+		} finally {
+			am.setStreamVolume(AudioManager.STREAM_ALARM, curVolume, 0);
 		}
 		return false;
 	}
@@ -106,7 +118,9 @@ public class NativeAudioAssetComplex implements OnPreparedListener, OnCompletion
 	        catch (IllegalStateException e)
 	        {
             // I don't know why this gets thrown; catch here to save app
-	        }
+	        } finally {
+			am.setStreamVolume(AudioManager.STREAM_ALARM, curVolume, 0);
+		}
 	}
 
 	public void setVolume(float volume) 

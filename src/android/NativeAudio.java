@@ -89,7 +89,7 @@ public class NativeAudio extends CordovaPlugin implements AudioManager.OnAudioFo
 				AssetFileDescriptor afd = am.openFd(fullPath);
 
 				NativeAudioAsset asset = new NativeAudioAsset(
-						afd, voices, (float)volume);
+						afd, voices, (float)volume, cordova);
 				assetMap.put(audioID, asset);
 
 				return new PluginResult(Status.OK);
@@ -203,7 +203,7 @@ public class NativeAudio extends CordovaPlugin implements AudioManager.OnAudioFo
 
 	        int result = am.requestAudioFocus(this,
 	                // Use the music stream.
-	                AudioManager.STREAM_MUSIC,
+	                AudioManager.STREAM_ALARM,
 	                // Request permanent focus.
 	                AudioManager.AUDIOFOCUS_GAIN);
 
