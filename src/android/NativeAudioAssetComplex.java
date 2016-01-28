@@ -16,6 +16,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import org.apache.cordova.CordovaInterface;
+import android.content.Context;
 
 public class NativeAudioAssetComplex implements OnPreparedListener, OnCompletionListener {
 
